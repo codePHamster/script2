@@ -97,35 +97,35 @@ if [ $# -ne 1 ]; then
 	exit 1
 fi
 
-#access public homework
+#Case: no public hw
 if [ ! -d $PUBLIC/homework/$1 ]; then
 	echo $EINVALID
 else
-	#now access home homework
+	#case: no home hw
 	if [ ! -d ~/homework/$1 ]; then
 		cp -r $PUBLIC/homework/$1 ~/homework
-		echo $SUCCESS
+	#case: home hw is empty
+	elif [ -z "$(ls -A ~/homework/$1)" ]; then
+		cp -r $PUBLIC/homework/$1 ~/homework/
 	else
-		for file in ~/homework/$1/*
+		for file in $PUBLIC/homework/$1/*
 		do
-			
-			if [ -z "$(ls -A ~/homework/$1)" ]; then
-				rm -r ~/homework/$1 
-				cp -r $PUBLIC/homework/$1 ~/homework
-				break
-			fi
-			PROMPT="$file already exists. Overwrite? (y/N) "
-			echo $PROMPT
-			read overwrite 
-			if [ "$overwrite" == "y" ] || [ "$overwrite" == "Y" ]; then
-				base=$(basename "$file")
-				rm $file
-				cp $PUBLIC/homework/$1/$base ~/homework/$1 
-			else
-				ABORT="Skipping $file."
-				echo $ABORT 
-			fi
+			base=$(basename "$file")
+			#case: duplicate in home hw
+			if [ -f ~/homework/$1/$base ]; then  
+				PROMPT="$file already exists. Overwrite? (y/N) "
+				echo $PROMPT
+				read overwrite 
+				if [ "$overwrite" == "y" ] || [ "$overwrite" == "Y" ]; then
+					cp $file ~/homework/$1 
+				else
+					ABORT="Skipping $file."
+					echo $ABORT 
+				fi
+			else 
+				cp $file ~/homework/$1 
+			fi	
 		done
-		echo $SUCCESS
 	fi
+	echo $SUCCESS
 fi
