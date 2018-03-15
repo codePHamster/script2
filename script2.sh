@@ -101,12 +101,9 @@ fi
 if [ ! -d $PUBLIC/homework/$1 ]; then
 	echo $EINVALID
 else
-	#case: no home hw
-	if [ ! -d ~/homework/$1 ]; then
+	#case: no home hw or empty home hw
+	if [ ! -d ~/homework/$1 ] || [ -z "$(ls -A ~/homework/$1)" ]; then
 		cp -r $PUBLIC/homework/$1 ~/homework
-	#case: home hw is empty
-	elif [ -z "$(ls -A ~/homework/$1)" ]; then
-		cp -r $PUBLIC/homework/$1 ~/homework/
 	else
 		for file in $PUBLIC/homework/$1/*
 		do
