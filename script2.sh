@@ -91,8 +91,6 @@
 USAGE="Usage: $0 [hw-name]"
 EINVALID="Invalid homework: $1"
 SUCCESS="Done.  Navigate to \`~/homework/$1\` to get started."
-public=$PUBLIC/homework/$1
-home=$HOME/homework/$1
 
 if [ $# -ne 1 ]; then
 	echo $USAGE
@@ -100,24 +98,29 @@ if [ $# -ne 1 ]; then
 fi
 
 #access public homework
-if [ ! -d 'public' ]; then
+if [ ! -d $PUBLIC/homework/$1 ]; then
 	echo $EINVALID
 else
 	#now access home homework
-	if [ ! -d home ]; then
-		cp -r $PUBLIC/homework/$1 $HOME/homework  
-		#if hw is empty
-			#copy recursively all the files in hw
+	if [ ! -d ~/homework/$1 ]; then
+		cp -r $PUBLIC/homework/$1 ~/homework
 		echo $SUCCESS
 	else
-		for file in home/*
+		for file in ~/homework/$1/*
 		do
-			file=$(basename "$file")
+			
+			if [ -z "$(ls -A ~/homework/$1)" ]; then
+				rm -r ~/homework/$1 
+				cp -r $PUBLIC/homework/$1 ~/homework
+				break
+			fi
 			PROMPT="$file already exists. Overwrite? (y/N) "
 			echo $PROMPT
 			read overwrite 
 			if [ "$overwrite" == "y" ] || [ "$overwrite" == "Y" ]; then
-				cp -rf $PUBLIC/homework/$1 $HOME/homework
+				base=$(basename "$file")
+				rm $file
+				cp $PUBLIC/homework/$1/$base ~/homework/$1 
 			else
 				ABORT="Skipping $file."
 				echo $ABORT 
